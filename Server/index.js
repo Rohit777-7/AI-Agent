@@ -63,7 +63,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import Connectdb from "./configs/Connectdb.js";
+import Connectdb from "./Configs/Connectdb.js";
 
 import authRouter from "./Routes/auth.routes.js";
 import userRouter from "./Routes/user.route.js";

@@ -10,8 +10,9 @@ import Login from "./pages/Login";
 import Builder from "./pages/Builder";
 import Billing from "./pages/Billing";
 
-export const ServerUrl = "http://localhost:8000";
-export const CLIENT_URL = "http://localhost:5173";
+// API calls go to /api on the same domain: Vite proxies them in development, vercel.json in production.
+export const ServerUrl = import.meta.env.VITE_SERVER_URL || "";
+export const CLIENT_URL = window.location.origin;
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

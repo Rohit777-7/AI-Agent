@@ -5,6 +5,9 @@
 
   const userId = script?.dataset?.userId;
 
+  // Everything the widget loads or calls lives on the domain this script was served from.
+  const BASE_URL = new URL(script?.src || window.location.href).origin;
+
   const THEME_STORAGE_KEY = "shifra-theme";
 
   const SUPPORTED_THEMES = ["light", "dark", "glass", "neon", "ocean", "sunset", "rose", "midnight"];
@@ -33,7 +36,7 @@
 
   link.rel = "stylesheet";
 
-  link.href = "http://localhost:5173/assistant.css";
+  link.href = `${BASE_URL}/assistant.css`;
 
   document.head.appendChild(link);
 
@@ -112,7 +115,7 @@
             <button class="shifra-mic">
 
                 <img
-                    src="http://localhost:5173/mic.svg"
+                    src="${BASE_URL}/mic.svg"
                     alt="mic"
                     class="shifra-mic-icon"
                 />
@@ -133,7 +136,7 @@
   button.innerHTML = `
     <span class="shifra-btn-mark"></span>
     <img
-        src="http://localhost:5173/LOGO.png"
+        src="${BASE_URL}/LOGO.png"
         alt="logo"
     />
 `;
@@ -158,7 +161,7 @@
   const loadAssistant = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/assistant/assistant/${userId}`,
+        `${BASE_URL}/api/assistant/assistant/${userId}`,
       );
 
       const data = await res.json();
@@ -276,7 +279,7 @@
     wave.style.opacity = "0";
 
     try {
-      const res = await fetch("http://localhost:8000/api/assistant/ask", {
+      const res = await fetch(`${BASE_URL}/api/assistant/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -376,7 +379,7 @@ if (SpeechRecognition) {
     status.innerText = "Thinking...";
 
     try {
-      const res = await fetch("http://localhost:8000/api/assistant/ask", {
+      const res = await fetch(`${BASE_URL}/api/assistant/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

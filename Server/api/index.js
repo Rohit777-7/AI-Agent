@@ -1,6 +1,6 @@
 
 import app from "../index.js";
-import Connectdb from "../configs/Connectdb.js";
+import Connectdb from "../Configs/Connectdb.js";
 
 export default async function handler(req, res) {
   try {
