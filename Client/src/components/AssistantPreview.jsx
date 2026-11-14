@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaMicrophone } from "react-icons/fa6";
 import { THEME_SWATCHES } from "../utils/themeSwatches";
 
@@ -120,7 +120,15 @@ const themes = {
 
 const AssistantPreview = () => {
   const [theme, setTheme] = useState("dark");
+  const [liveWidgetOpen, setLiveWidgetOpen] = useState(false);
   const current = themes[theme];
+
+  // Step aside while the real assistant widget is open, so the two never overlap.
+  useEffect(() => {
+    const onToggle = (event) => setLiveWidgetOpen(!!event.detail?.open);
+    window.addEventListener("shifra-popup-toggle", onToggle);
+    return () => window.removeEventListener("shifra-popup-toggle", onToggle);
+  }, []);
 
   const updateTheme = (nextTheme) => {
     setTheme(nextTheme);
@@ -138,7 +146,10 @@ const AssistantPreview = () => {
   return (
     <div className="flex flex-col items-center gap-5">
       <div
-        className={`relative w-[290px] h-[460px] sm:w-[340px] sm:h-[520px] rounded-[36px] overflow-hidden transition-all duration-500 ${current.bg} ${current.cardBorder} shadow-[0_40px_100px_-30px_rgba(30,20,60,0.45)]`}
+        aria-hidden={liveWidgetOpen}
+        className={`relative w-[290px] h-[460px] sm:w-[340px] sm:h-[520px] rounded-[36px] overflow-hidden transition-all duration-500 ${current.bg} ${current.cardBorder} shadow-[0_40px_100px_-30px_rgba(30,20,60,0.45)] ${
+          liveWidgetOpen ? "opacity-0 scale-95 pointer-events-none" : ""
+        }`}
       >
         {/* Background Overlay */}
         <div className={`absolute inset-0 ${current.overlay}`} />
@@ -204,8 +215,8 @@ const AssistantPreview = () => {
       </div>
 
       {/* Theme switcher */}
-      <div className="flex items-center gap-3 rounded-full border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(16,16,32,0.04)] pl-4 pr-2 py-2">
-        <span className="text-xs font-medium text-zinc-600 capitalize w-16">
+      <div className="flex items-center gap-3 rounded-full border border-gold-200 bg-[#fffdf9] shadow-[0_10px_30px_-18px_rgba(67,50,29,0.35)] pl-4 pr-2 py-2">
+        <span className="text-xs font-medium text-stone-600 capitalize w-16">
           {theme}
         </span>
 
@@ -218,7 +229,7 @@ const AssistantPreview = () => {
               aria-label={`${name} theme`}
               aria-pressed={theme === name}
               className={`w-5 h-5 rounded-full ring-offset-2 ring-offset-white border border-black/10 transition-all ${swatch} ${
-                theme === name ? "ring-2 ring-violet-400 scale-110" : "hover:scale-110"
+                theme === name ? "ring-2 ring-gold-500 scale-110" : "hover:scale-110"
               }`}
             />
           ))}

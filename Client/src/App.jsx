@@ -4,6 +4,7 @@ import axios from "axios";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -52,6 +53,7 @@ const App = () => {
             <>
               <Navbar user={user} setUser={setUser} />
               <Home user={user} />
+              <Footer />
             </>
           </ProtectedRoute>
         }
@@ -64,6 +66,7 @@ const App = () => {
             <>
               <Navbar user={user} setUser={setUser} />
               <Builder user={user} setUser={setUser} />
+              <Footer />
             </>
           </ProtectedRoute>
         }
@@ -76,6 +79,7 @@ const App = () => {
             <>
               <Navbar user={user} setUser={setUser} />
               <Billing user={user} setUser={setUser} />
+              <Footer />
             </>
           </ProtectedRoute>
         }

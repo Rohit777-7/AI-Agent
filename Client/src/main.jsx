@@ -11,9 +11,9 @@ createRoot(document.getElementById('root')).render(
     <Toaster
       toastOptions={{
         style: {
-          background: "#ffffff",
-          color: "#18181b",
-          border: "1px solid #e7e5e4",
+          background: "#fffdf9",
+          color: "#1a1712",
+          border: "1px solid #e3d3b2",
           borderRadius: "12px",
           fontSize: "14px",
         },

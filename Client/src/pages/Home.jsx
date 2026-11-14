@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowRight, FiMic, FiNavigation, FiDroplet, FiCode } from "react-icons/fi";
 import AssistantPreview from "../components/AssistantPreview";
-import logo from "../assets/logo-mark.png";
 
 const STEPS = [
   {
@@ -65,17 +64,17 @@ const Home = ({ user }) => {
       {/* Hero Section */}
       <section className="relative px-4 sm:px-6 pt-16 sm:pt-24 pb-20">
         <div className="absolute inset-0 bg-grid" />
-        <div className="absolute -top-32 left-[10%] w-[520px] h-[520px] rounded-full bg-violet-600/20 blur-[140px]" />
-        <div className="absolute top-40 right-[5%] w-[420px] h-[420px] rounded-full bg-emerald-500/10 blur-[140px]" />
+        <div className="absolute -top-32 left-[10%] w-[520px] h-[520px] rounded-full bg-gold-200/60 blur-[140px]" />
+        <div className="absolute top-40 right-[5%] w-[420px] h-[420px] rounded-full bg-gold-200/50 blur-[140px]" />
 
         <div className="relative max-w-6xl mx-auto grid lg:grid-cols-[1.15fr_1fr] gap-16 items-center">
           <div className="text-center lg:text-left">
             <span className="eyebrow">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-500" />
               Voice AI for modern websites
             </span>
 
-            <h1 className="mt-8 text-[44px] leading-[1.05] sm:text-6xl lg:text-[76px] font-semibold tracking-[-0.04em] text-zinc-950">
+            <h1 className="mt-8 font-display text-[54px] leading-[1] sm:text-7xl lg:text-[92px] tracking-[-0.02em] text-stone-950">
               Add a{" "}
               <span className="font-display italic font-normal tracking-[-0.01em] text-gradient pr-2">
                 virtual assistant
@@ -83,7 +82,7 @@ const Home = ({ user }) => {
               to your website
             </h1>
 
-            <p className="mt-7 max-w-xl mx-auto lg:mx-0 text-base sm:text-lg text-zinc-600 leading-relaxed">
+            <p className="mt-7 max-w-xl mx-auto lg:mx-0 text-base sm:text-lg text-stone-600 leading-relaxed">
               Create a smart voice-enabled assistant that talks to visitors,
               answers questions and helps them navigate your website instantly.
             </p>
@@ -105,14 +104,14 @@ const Home = ({ user }) => {
               </button>
             </div>
 
-            <p className="mt-5 text-sm text-zinc-500">
+            <p className="mt-5 text-sm text-stone-500">
               Free plan includes 200 AI responses
             </p>
           </div>
 
           {/* Assistant Preview */}
           <div className="relative flex justify-center">
-            <div className="absolute inset-10 bg-gradient-to-br from-violet-500/30 to-emerald-500/20 blur-[90px]" />
+            <div className="absolute inset-10 bg-gradient-to-br from-gold-300/40 to-gold-100/60 blur-[90px]" />
             <div className="relative">
               <AssistantPreview />
             </div>
@@ -122,13 +121,13 @@ const Home = ({ user }) => {
 
       {/* Stats */}
       <section className="px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 rounded-3xl border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(16,16,32,0.04)] divide-x divide-y md:divide-y-0 divide-zinc-200 overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 rounded-3xl border border-stone-200 bg-white shadow-[0_1px_2px_rgba(16,16,32,0.04)] divide-x divide-y md:divide-y-0 divide-stone-200 overflow-hidden">
           {STATS.map((stat) => (
             <div key={stat.label} className="px-6 py-8 text-center">
-              <p className="text-4xl font-semibold tracking-tight text-zinc-950">
+              <p className="text-4xl font-semibold tracking-tight text-stone-950">
                 {stat.value}
               </p>
-              <p className="mt-2 text-sm text-zinc-500">{stat.label}</p>
+              <p className="mt-2 text-sm text-stone-500">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -138,10 +137,10 @@ const Home = ({ user }) => {
       <section className="px-4 sm:px-6 py-24">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-violet-600">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-gold-600">
               Why Shifra
             </p>
-            <h2 className="mt-4 text-3xl sm:text-5xl font-semibold tracking-[-0.03em] text-zinc-950">
+            <h2 className="mt-4 font-display text-4xl sm:text-6xl leading-[1.05] tracking-[-0.015em] text-stone-950">
               Everything a website assistant{" "}
               <span className="font-display italic font-normal text-gradient">
                 needs.
@@ -153,14 +152,14 @@ const Home = ({ user }) => {
             {HIGHLIGHTS.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
-                className="surface p-7 transition-colors hover:border-zinc-300"
+                className="surface p-7 transition-colors hover:border-stone-300"
               >
-                <div className="w-11 h-11 rounded-xl border border-zinc-200 bg-gradient-to-br from-violet-500/25 to-emerald-500/10 text-violet-700 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl border border-stone-200 bg-gradient-to-br from-gold-100 to-gold-50 text-gold-700 flex items-center justify-center">
                   <Icon size={18} />
                 </div>
 
-                <h3 className="mt-6 text-lg font-semibold text-zinc-950">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-600">{desc}</p>
+                <h3 className="mt-6 text-lg font-semibold text-stone-950">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">{desc}</p>
               </div>
             ))}
           </div>
@@ -171,11 +170,11 @@ const Home = ({ user }) => {
       <section className="px-4 sm:px-6 pb-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-zinc-950">
+            <h2 className="font-display text-4xl sm:text-5xl tracking-[-0.015em] text-stone-950">
               Get started in minutes
             </h2>
 
-            <p className="text-zinc-600 mt-3">
+            <p className="text-stone-600 mt-3">
               Simple setup. No complicated integration.
             </p>
           </div>
@@ -184,19 +183,19 @@ const Home = ({ user }) => {
             {STEPS.map((s) => (
               <div
                 key={s.step}
-                className="group relative rounded-3xl border border-zinc-200 bg-white p-7 transition-all hover:shadow-[0_20px_40px_-20px_rgba(16,16,32,0.18)] hover:-translate-y-1"
+                className="group relative rounded-3xl border border-stone-200 bg-white p-7 transition-all hover:shadow-[0_20px_40px_-20px_rgba(16,16,32,0.18)] hover:-translate-y-1"
               >
-                <div className="absolute inset-x-7 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-x-7 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                <span className="font-mono text-sm text-violet-600">
+                <span className="font-mono text-sm text-gold-600">
                   {s.step}
                 </span>
 
-                <h3 className="mt-6 text-lg font-semibold text-zinc-950">
+                <h3 className="mt-6 text-lg font-semibold text-stone-950">
                   {s.title}
                 </h3>
 
-                <p className="mt-2 text-sm text-zinc-600 leading-relaxed">
+                <p className="mt-2 text-sm text-stone-600 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -207,24 +206,29 @@ const Home = ({ user }) => {
 
       {/* CTA */}
       <section className="px-4 sm:px-6 pb-24">
-        <div className="surface relative max-w-6xl mx-auto overflow-hidden px-8 py-14 sm:px-14 text-center">
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-violet-600/25 blur-[100px]" />
+        <div className="relative max-w-6xl mx-auto overflow-hidden rounded-[32px] bg-ink px-8 py-20 sm:px-14 text-center shadow-[0_40px_80px_-40px_rgba(26,23,18,0.7)]">
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[640px] h-[320px] rounded-full bg-gold-500/25 blur-[110px]" />
+          <div className="absolute inset-x-16 top-0 gold-rule" />
 
-          <h2 className="relative text-3xl sm:text-5xl font-semibold tracking-[-0.03em] text-zinc-950">
+          <p className="relative text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+            Ready when you are
+          </p>
+
+          <h2 className="relative mt-5 font-display text-4xl sm:text-6xl leading-[1.05] tracking-[-0.015em] text-gold-50">
             Give your website a{" "}
-            <span className="font-display italic font-normal text-gradient">
+            <span className="font-display italic font-normal text-gold-300">
               voice.
             </span>
           </h2>
 
-          <p className="relative mt-4 text-zinc-600 max-w-lg mx-auto">
+          <p className="relative mt-5 text-stone-400 max-w-lg mx-auto">
             Set up your assistant, copy one line, and start talking to your
             visitors today.
           </p>
 
           <button
             onClick={() => navigate("/builder")}
-            className="btn-primary relative mt-8 h-12 px-7"
+            className="btn-accent relative mt-9 h-12 px-8"
           >
             Start building
             <FiArrowRight />
@@ -232,31 +236,6 @@ const Home = ({ user }) => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-200/80 px-6 py-10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-3"
-          >
-            <img src={logo} alt="" className="w-8 h-8 rounded-full" />
-
-            <div className="text-left">
-              <p className="text-lg font-bold text-zinc-950 leading-none">
-                Shifra <span className="text-gradient">AI</span>
-              </p>
-
-              <p className="mt-1.5 text-zinc-500 text-sm">
-                Voice AI assistant for websites
-              </p>
-            </div>
-          </button>
-
-          <p className="text-zinc-500 text-sm">
-            © {new Date().getFullYear()} ShifraAI. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };

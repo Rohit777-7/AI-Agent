@@ -88,13 +88,28 @@
             </div>
 
             <!-- User Text -->
-            <div class="shifra-user-text">
-            </div>
+            <div class="shifra-user-text"></div>
 
             <!-- AI Text -->
-            <div class="shifra-ai-text">
-            </div>
+            <div class="shifra-ai-text"></div>
 
+        </div>
+
+        <div class="shifra-bottom">
+
+            <button class="shifra-mic" type="button" aria-label="Speak to the assistant">
+
+                <img
+                    src="${BASE_URL}/mic.svg"
+                    alt=""
+                    class="shifra-mic-icon"
+                />
+
+            </button>
+
+        </div>
+
+        <div class="shifra-footer">
             <form class="shifra-command-form">
               <input
                 class="shifra-command-input"
@@ -107,21 +122,6 @@
                 Send
               </button>
             </form>
-
-        </div>
-
-        <div class="shifra-bottom">
-
-            <button class="shifra-mic">
-
-                <img
-                    src="${BASE_URL}/mic.svg"
-                    alt="mic"
-                    class="shifra-mic-icon"
-                />
-
-            </button>
-
         </div>
 
     </div>
@@ -148,6 +148,11 @@
   const setPopupState = (open) => {
     isPopupOpen = open;
     popup.style.display = open ? "block" : "none";
+
+    // Lets the host page react, e.g. hide its own assistant preview.
+    window.dispatchEvent(
+      new CustomEvent("shifra-popup-toggle", { detail: { open } }),
+    );
 
     if (open) {
       commandInput?.focus();
@@ -190,16 +195,18 @@
 
     const title = popup.querySelector(".shifra-title");
 
-    title.innerHTML = `Hello! I'm ${assistantConfig.assistantName}`;
+    title.textContent = `Hello! I'm ${assistantConfig.assistantName || "your assistant"}`;
 
     const subTitle = popup.querySelector(".shifra-sub");
 
-    subTitle.innerHTML = `
-        Welcome to
-        ${assistantConfig.bussinessName}.
-        <br />
-        Ask anything about your website.
-    `;
+    // Only greet with the business name when one has been set.
+    const businessName = assistantConfig.bussinessName?.trim();
+
+    subTitle.textContent = businessName
+      ? `Welcome to ${businessName}.`
+      : "Your smart voice assistant.";
+    subTitle.appendChild(document.createElement("br"));
+    subTitle.append("Ask anything about your website.");
   };
 
   window.addEventListener("shifra-theme-change", (event) => {

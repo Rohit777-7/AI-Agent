@@ -70,14 +70,14 @@ function Login({ setUser }) {
     <div className="relative min-h-screen overflow-hidden bg-canvas">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-grid" />
-      <div className="absolute -top-40 left-1/4 w-[520px] h-[520px] rounded-full bg-violet-600/20 blur-[140px]" />
-      <div className="absolute -bottom-40 right-1/4 w-[480px] h-[480px] rounded-full bg-emerald-500/10 blur-[140px]" />
+      <div className="absolute -top-40 left-1/4 w-[520px] h-[520px] rounded-full bg-gold-200/60 blur-[140px]" />
+      <div className="absolute -bottom-40 right-1/4 w-[480px] h-[480px] rounded-full bg-gold-200/50 blur-[140px]" />
 
       <div className="relative max-w-6xl mx-auto px-6">
         {/* Top bar */}
         <div className="h-20 flex items-center gap-2.5">
-          <img src={logo} alt="" className="w-8 h-8 rounded-full shadow-[0_0_24px_-4px_rgba(56,189,248,0.6)]" />
-          <span className="font-bold text-lg tracking-tight text-zinc-950">
+          <img src={logo} alt="" className="w-8 h-8 rounded-full shadow-[0_0_24px_-4px_rgba(176,141,87,0.55)]" />
+          <span className="font-bold text-lg tracking-tight text-stone-950">
             Shifra <span className="text-gradient">AI</span>
           </span>
         </div>
@@ -87,20 +87,20 @@ function Login({ setUser }) {
           <div>
             <span className="eyebrow">
               <span className="relative flex w-2 h-2">
-                <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
-                <span className="relative w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="absolute inset-0 rounded-full bg-gold-400 animate-ping opacity-60" />
+                <span className="relative w-2 h-2 rounded-full bg-gold-500" />
               </span>
               AI voice assistant platform
             </span>
 
-            <h1 className="mt-8 text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-zinc-950">
+            <h1 className="mt-8 font-display text-6xl sm:text-7xl lg:text-[88px] tracking-[-0.02em] leading-[0.98] text-stone-950">
               Build AI assistants
               <span className="block mt-1 font-display italic font-normal tracking-[-0.01em] text-gradient">
                 for any website.
               </span>
             </h1>
 
-            <p className="mt-7 text-lg text-zinc-600 leading-relaxed max-w-xl">
+            <p className="mt-7 text-lg text-stone-600 leading-relaxed max-w-xl">
               Create customisable voice assistants that talk, guide users and
               plug into any website in minutes.
             </p>
@@ -118,9 +118,9 @@ function Login({ setUser }) {
               {PERKS.map((perk) => (
                 <li
                   key={perk}
-                  className="flex items-center gap-2 text-sm text-zinc-600"
+                  className="flex items-center gap-2 text-sm text-stone-600"
                 >
-                  <FiCheck className="text-emerald-500" />
+                  <FiCheck className="text-gold-600" />
                   {perk}
                 </li>
               ))}
@@ -129,15 +129,15 @@ function Login({ setUser }) {
 
           {/* Right */}
           <div className="relative">
-            <div className="absolute -inset-6 bg-gradient-to-br from-violet-500/20 via-transparent to-emerald-500/15 blur-3xl" />
+            <div className="absolute -inset-6 bg-gradient-to-br from-gold-200/50 via-transparent to-gold-100/60 blur-3xl" />
 
             <div className="surface relative p-7 sm:p-8">
               <div className="flex items-start justify-between gap-6">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-500">
                     Included
                   </p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
                     Everything you need
                   </h2>
                 </div>
@@ -145,7 +145,7 @@ function Login({ setUser }) {
                 <img
                   src={logo}
                   alt=""
-                  className="w-12 h-12 rounded-full shadow-[0_0_40px_-6px_rgba(56,189,248,0.7)]"
+                  className="w-12 h-12 rounded-full shadow-[0_0_40px_-6px_rgba(176,141,87,0.6)]"
                 />
               </div>
 
@@ -153,17 +153,17 @@ function Login({ setUser }) {
                 {FEATURES.map(({ icon: Icon, title, desc }) => (
                   <div
                     key={title}
-                    className="flex gap-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-4 transition-colors hover:bg-zinc-50"
+                    className="flex gap-4 rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 transition-colors hover:bg-stone-50"
                   >
-                    <div className="shrink-0 w-11 h-11 rounded-xl border border-zinc-200 bg-gradient-to-br from-violet-500/20 to-emerald-500/10 text-violet-700 flex items-center justify-center">
+                    <div className="shrink-0 w-11 h-11 rounded-xl border border-stone-200 bg-gradient-to-br from-gold-100 to-gold-50 text-gold-700 flex items-center justify-center">
                       <Icon size={18} />
                     </div>
 
                     <div>
-                      <h3 className="text-[15px] font-semibold text-zinc-900">
+                      <h3 className="text-[15px] font-semibold text-stone-900">
                         {title}
                       </h3>
-                      <p className="mt-1 text-sm leading-6 text-zinc-600">
+                      <p className="mt-1 text-sm leading-6 text-stone-600">
                         {desc}
                       </p>
                     </div>
@@ -171,11 +171,11 @@ function Login({ setUser }) {
                 ))}
               </div>
 
-              <div className="mt-6 rounded-xl bg-[#0c0a14] px-4 py-3 font-mono text-[12px] text-zinc-400 overflow-x-auto whitespace-nowrap">
-                <span className="text-violet-300">&lt;script</span>{" "}
+              <div className="mt-6 rounded-xl bg-[#0c0a14] px-4 py-3 font-mono text-[12px] text-stone-400 overflow-x-auto whitespace-nowrap">
+                <span className="text-gold-300">&lt;script</span>{" "}
                 <span className="text-emerald-300">src</span>=
                 <span className="text-amber-200">"…/assistant.js"</span>
-                <span className="text-violet-300">&gt;&lt;/script&gt;</span>
+                <span className="text-gold-300">&gt;&lt;/script&gt;</span>
               </div>
             </div>
           </div>

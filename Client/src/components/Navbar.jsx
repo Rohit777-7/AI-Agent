@@ -15,8 +15,8 @@ const NAV_LINKS = [
 const linkClass = ({ isActive }) =>
   `px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
     isActive
-      ? "bg-zinc-100 text-zinc-950"
-      : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+      ? "bg-stone-100 text-stone-950"
+      : "text-stone-600 hover:text-stone-950 hover:bg-stone-100"
   }`;
 
 function Navbar({ user, setUser }) {
@@ -57,7 +57,7 @@ function Navbar({ user, setUser }) {
     <header
       className={`sticky top-0 z-50 -mb-16 border-b transition-[background-color,border-color,backdrop-filter] duration-300 ${
         scrolled || menuOpen
-          ? "bg-canvas/80 backdrop-blur-xl border-zinc-200/80"
+          ? "bg-canvas/80 backdrop-blur-xl border-stone-200/80"
           : "bg-transparent border-transparent"
       }`}
     >
@@ -70,10 +70,10 @@ function Navbar({ user, setUser }) {
           <img
             src={logo}
             alt=""
-            className="w-8 h-8 rounded-full shadow-[0_0_24px_-4px_rgba(56,189,248,0.6)]"
+            className="w-8 h-8 rounded-full shadow-[0_0_24px_-4px_rgba(176,141,87,0.55)]"
           />
 
-          <span className="font-bold text-lg tracking-tight text-zinc-950">
+          <span className="font-bold text-lg tracking-tight text-stone-950">
             Shifra <span className="text-gradient">AI</span>
           </span>
         </button>
@@ -96,17 +96,17 @@ function Navbar({ user, setUser }) {
 
         {/* Account */}
         {user && (
-          <div className="hidden md:flex items-center gap-3 pl-1.5 pr-1.5 py-1.5 rounded-full border border-zinc-200 bg-white">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-emerald-400 text-white text-sm flex items-center justify-center font-semibold">
+          <div className="hidden md:flex items-center gap-3 pl-1.5 pr-1.5 py-1.5 rounded-full border border-stone-200 bg-white">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-300 to-gold-600 text-white text-sm flex items-center justify-center font-semibold">
               {initial}
             </div>
 
             <div className="max-w-[150px] leading-tight">
-              <p className="text-[13px] font-semibold text-zinc-900 truncate">
+              <p className="text-[13px] font-semibold text-stone-900 truncate">
                 {user?.name}
               </p>
 
-              <p className="text-[11px] text-zinc-500 truncate">
+              <p className="text-[11px] text-stone-500 truncate">
                 {user?.email}
               </p>
             </div>
@@ -115,7 +115,7 @@ function Navbar({ user, setUser }) {
               onClick={handleLogout}
               title="Log out"
               aria-label="Log out"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-rose-500 hover:bg-zinc-100 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-600 hover:text-rose-500 hover:bg-stone-100 transition-colors"
             >
               <FiLogOut size={15} />
             </button>
@@ -126,7 +126,7 @@ function Navbar({ user, setUser }) {
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
-            className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center border border-zinc-200 text-zinc-700"
+            className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center border border-stone-200 text-stone-700"
           >
             {menuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </button>
@@ -136,17 +136,17 @@ function Navbar({ user, setUser }) {
       {menuOpen && (
         <div className="md:hidden px-4 pb-4">
           <div className="surface p-3">
-            <div className="flex items-center gap-3 p-3 border-b border-zinc-200/80">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-emerald-400 text-white flex items-center justify-center font-semibold">
+            <div className="flex items-center gap-3 p-3 border-b border-stone-200/80">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold-300 to-gold-600 text-white flex items-center justify-center font-semibold">
                 {initial}
               </div>
 
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold text-zinc-900 truncate">
+                <p className="text-sm font-semibold text-stone-900 truncate">
                   {user?.name}
                 </p>
 
-                <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
+                <p className="text-xs text-stone-500 truncate">{user?.email}</p>
               </div>
             </div>
 

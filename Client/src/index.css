@@ -5,7 +5,20 @@
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-canvas: #fafaf9;
+  --color-canvas: #f8f5ee;
+  --color-ink: #1a1712;
+
+  /* Champagne gold */
+  --color-gold-50: #fcf8ef;
+  --color-gold-100: #f6eedb;
+  --color-gold-200: #ecdcb8;
+  --color-gold-300: #dec393;
+  --color-gold-400: #c9a66f;
+  --color-gold-500: #b08d57;
+  --color-gold-600: #957442;
+  --color-gold-700: #7a5c33;
+  --color-gold-800: #5e4628;
+  --color-gold-900: #43321d;
 
   --animate-wave: wave 1.1s ease-in-out infinite;
   --animate-float: float 7s ease-in-out infinite;
@@ -24,19 +37,34 @@
 @layer base {
   html {
     color-scheme: light;
+    /* Hide scrollbars while keeping the page scrollable */
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  html,
+  body {
+    /* Decorative glows must never widen the page */
+    overflow-x: clip;
   }
 
   body {
-    background: var(--color-canvas);
-    color: #18181b;
+    background-color: var(--color-canvas);
+    /* Fine paper grain */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.18 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
-    background: rgba(139, 92, 246, 0.2);
-    color: #09090b;
+    background: rgba(201, 166, 111, 0.35);
+    color: var(--color-ink);
   }
 
   button:not(:disabled) {
@@ -48,33 +76,39 @@
   .surface {
     position: relative;
     border-radius: 24px;
-    border: 1px solid #e7e5e4;
-    background: #ffffff;
+    border: 1px solid #ebe3d3;
+    background: linear-gradient(180deg, #fffdf9 0%, #fffcf6 100%);
     box-shadow:
-      0 1px 2px rgba(16, 16, 32, 0.04),
-      0 16px 40px -20px rgba(16, 16, 32, 0.12);
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(67, 50, 29, 0.04),
+      0 24px 48px -28px rgba(67, 50, 29, 0.18);
   }
 
   .text-gradient {
-    background: linear-gradient(90deg, #7c3aed 0%, #6366f1 45%, #059669 100%);
+    background: linear-gradient(100deg, #7a5c33 0%, #b08d57 35%, #d9bd89 55%, #957442 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a66f 50%, transparent);
   }
 
   .eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 999px;
-    border: 1px solid #e7e5e4;
-    background: #ffffff;
-    color: #6d28d9;
-    font-size: 12px;
+    border: 1px solid #e3d3b2;
+    background: rgba(255, 253, 249, 0.8);
+    color: #7a5c33;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.01em;
-    box-shadow: 0 1px 2px rgba(16, 16, 32, 0.04);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   .btn-primary,
@@ -85,45 +119,52 @@
     justify-content: center;
     gap: 8px;
     height: 44px;
-    padding: 0 20px;
-    border-radius: 12px;
+    padding: 0 22px;
+    border-radius: 999px;
     font-size: 14px;
     font-weight: 600;
+    letter-spacing: 0.01em;
     white-space: nowrap;
-    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
   }
 
   .btn-primary {
-    background: #0c0a14;
-    color: #ffffff;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 10px 24px -10px rgba(12, 10, 20, 0.5);
+    background: var(--color-ink);
+    color: #fbf6ea;
+    box-shadow:
+      inset 0 0 0 1px rgba(222, 195, 147, 0.35),
+      0 12px 28px -12px rgba(26, 23, 18, 0.55);
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: #1f1b2e;
+    background: #2a251d;
     transform: translateY(-1px);
   }
 
   .btn-ghost {
-    border: 1px solid #e4e4e7;
-    background: #ffffff;
-    color: #27272a;
-    box-shadow: 0 1px 2px rgba(16, 16, 32, 0.04);
+    border: 1px solid #e3d3b2;
+    background: rgba(255, 253, 249, 0.85);
+    color: #2a251d;
   }
 
   .btn-ghost:hover:not(:disabled) {
-    background: #f4f4f5;
+    background: #fcf8ef;
+    border-color: #c9a66f;
   }
 
   .btn-accent {
-    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #10b981 100%);
-    color: #fff;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 14px 32px -12px rgba(124, 58, 237, 0.55);
+    background: linear-gradient(135deg, #e7d2a6 0%, #c9a66f 45%, #a8854f 100%);
+    color: var(--color-ink);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 14px 30px -12px rgba(149, 116, 66, 0.6);
   }
 
   .btn-accent:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 18px 40px -12px rgba(124, 58, 237, 0.65);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 18px 38px -12px rgba(149, 116, 66, 0.7);
   }
 
   .btn-primary:disabled,
@@ -135,39 +176,38 @@
 
   .field {
     width: 100%;
-    border-radius: 12px;
-    border: 1px solid #e4e4e7;
-    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e7decb;
+    background: #fffdf9;
     padding: 12px 14px;
-    color: #18181b;
+    color: var(--color-ink);
     font-size: 14px;
     outline: none;
-    box-shadow: 0 1px 2px rgba(16, 16, 32, 0.03);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .field::placeholder {
-    color: #a1a1aa;
+    color: #a8a092;
   }
 
   .field:focus {
-    border-color: #a78bfa;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    border-color: #c9a66f;
+    box-shadow: 0 0 0 4px rgba(201, 166, 111, 0.18);
   }
 
   .field-label {
     display: block;
     margin-bottom: 8px;
-    color: #3f3f46;
+    color: #44403c;
     font-size: 13px;
     font-weight: 500;
   }
 
   .bg-grid {
     background-image:
-      linear-gradient(rgba(24, 24, 48, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(24, 24, 48, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
+      linear-gradient(rgba(122, 92, 51, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(122, 92, 51, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
     mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 100%);
   }
 }
