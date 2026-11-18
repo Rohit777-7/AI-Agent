@@ -1,6 +1,51 @@
 import User from "../Models/user.model.js";
 import { generateGeminiResponse } from "../Configs/gemini.js";
 
+const NAVIGATION_INTENT =
+  /\b(go|goto|take|open|navigate|show|move|bring|switch|visit|jump|redirect)\b/;
+
+const normalizeText = (text = "") =>
+  text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const containsPhrase = (text, phrase) =>
+  Boolean(phrase) && new RegExp(`\\b${escapeRegExp(phrase)}\\b`).test(text);
+
+// Finds the page a visitor is asking for. Keywords always count; the page name
+// counts when the message clearly asks to go somewhere ("take me to home").
+// "home page" also matches "homepage", and the longest match wins.
+export const findMatchingPage = (pages = [], message = "") => {
+  const text = normalizeText(message);
+  const wantsToNavigate = NAVIGATION_INTENT.test(text);
+  let best = null;
+
+  for (const page of pages) {
+    const phrases = (page.keywords || []).map(normalizeText).filter(Boolean);
+    const name = normalizeText(page.name);
+
+    if (wantsToNavigate && name) {
+      phrases.push(name);
+    }
+
+    for (const phrase of phrases) {
+      const matched =
+        containsPhrase(text, phrase) ||
+        (phrase.includes(" ") && containsPhrase(text, phrase.replace(/ /g, "")));
+
+      if (matched && (!best || phrase.length > best.length)) {
+        best = { page, length: phrase.length };
+      }
+    }
+  }
+
+  return best?.page || null;
+};
+
 export const getAssistantConfig = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -70,11 +115,7 @@ export const askAssistant = async (req, res) => {
       .trim();
 
     if (user.enableNavigation) {
-      const matchedPage = user.pages.find((page) =>
-        page.keywords?.some((keyword) =>
-          cleanMessage.includes(keyword.toLowerCase()),
-        ),
-      );
+      const matchedPage = findMatchingPage(user.pages, message);
 
       console.log("Voice:", cleanMessage);
       console.log("Matched Page:", matchedPage);
@@ -117,6 +158,8 @@ Rules:
 - Behave like smart voice assistant
 - Avoid long explanations
 - Keep responses short for quick voice playback
+- You cannot open or navigate to pages yourself. Never say you are taking the user somewhere.
+- If the user asks to go to a page, say it isn't available and list these pages instead: ${user.pages.map((page) => page.name).filter(Boolean).join(", ") || "none"}
 
 User Question:
 ${message}

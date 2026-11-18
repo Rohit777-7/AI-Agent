@@ -9,6 +9,7 @@ import { ServerUrl } from "../App";
 const NAV_LINKS = [
   { to: "/", label: "Overview", end: true },
   { to: "/builder", label: "Builder" },
+  { to: "/chat", label: "Chat" },
   { to: "/billing", label: "Billing" },
 ];
 

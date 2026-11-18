@@ -70,6 +70,12 @@
   button:not(:disabled) {
     cursor: pointer;
   }
+
+  /* The embedded site widget is redundant inside the Chat studio */
+  body.studio-open .shifra-btn,
+  body.studio-open .shifra-popup {
+    display: none !important;
+  }
 }
 
 @layer components {

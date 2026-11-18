@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Builder from "./pages/Builder";
 import Billing from "./pages/Billing";
+import Chat from "./pages/Chat";
 
 // API calls go to /api on the same domain: Vite proxies them in development, vercel.json in production.
 export const ServerUrl = import.meta.env.VITE_SERVER_URL || "";
@@ -81,6 +82,15 @@ const App = () => {
               <Billing user={user} setUser={setUser} />
               <Footer />
             </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute user={user} loading={loading}>
+            <Chat user={user} setUser={setUser} />
           </ProtectedRoute>
         }
       />
