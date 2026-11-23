@@ -43,13 +43,11 @@ function Login({ setUser }) {
     setSigningIn(true);
     try {
       const result = await signInWithPopup(auth, provider);
-      const { displayName, email } = result.user;
+      // The server verifies this Google-signed token; it never trusts a name or email we send.
+      const idToken = await result.user.getIdToken();
       const res = await axios.post(
         ServerUrl + "/api/auth/google",
-        {
-          name: displayName,
-          email,
-        },
+        { idToken },
         {
           withCredentials: true,
         },

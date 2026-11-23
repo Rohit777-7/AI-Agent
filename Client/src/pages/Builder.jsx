@@ -17,6 +17,9 @@ import {
   FiDroplet,
   FiKey,
   FiNavigation,
+  FiGlobe,
+  FiX,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -27,6 +30,40 @@ import { THEME_SWATCHES } from "../utils/themeSwatches";
 const THEMES = ["light", "dark", "glass", "neon", "ocean", "sunset", "rose", "midnight"];
 
 const TONES = ["Formal", "Informal", "Friendly", "Professional"];
+
+const LANGUAGES = [
+  { value: "auto", label: "Visitor's browser language" },
+  { value: "en-IN", label: "English (India)" },
+  { value: "en-US", label: "English (US)" },
+  { value: "en-GB", label: "English (UK)" },
+  { value: "hi-IN", label: "Hindi" },
+  { value: "mr-IN", label: "Marathi" },
+  { value: "bn-IN", label: "Bengali" },
+  { value: "ta-IN", label: "Tamil" },
+  { value: "te-IN", label: "Telugu" },
+  { value: "gu-IN", label: "Gujarati" },
+  { value: "kn-IN", label: "Kannada" },
+  { value: "ml-IN", label: "Malayalam" },
+  { value: "pa-IN", label: "Punjabi" },
+  { value: "ur-IN", label: "Urdu" },
+  { value: "es-ES", label: "Spanish" },
+  { value: "fr-FR", label: "French" },
+  { value: "de-DE", label: "German" },
+  { value: "ar-SA", label: "Arabic" },
+];
+
+const languageLabel = (value) =>
+  LANGUAGES.find((language) => language.value === value)?.label || LANGUAGES[0].label;
+
+// "https://www.Shop.com/about" -> "shop.com"
+const toHostname = (value) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/^[a-z]+:\/\//, "")
+    .replace(/[/?#].*$/, "")
+    .replace(/:\d+$/, "")
+    .replace(/^www\./, "");
 
 const STATUS_STYLES = {
   active: { dot: "bg-emerald-400", text: "text-emerald-600" },
@@ -80,7 +117,8 @@ const Builder = ({ user, setUser }) => {
 
   const [theme, setTheme] = useState(user?.theme || "dark");
   const [tone, setTone] = useState(user?.tone || "Friendly");
-  const [geminiApiKey, setGeminiApiKey] = useState(user?.geminiApiKey || "");
+  // The saved key is never sent to the browser; an empty field keeps it.
+  const [geminiApiKey, setGeminiApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -88,6 +126,9 @@ const Builder = ({ user, setUser }) => {
   const [pageName, setPageName] = useState("");
   const [pagePath, setPagePath] = useState("");
   const [pageKeywords, setPageKeywords] = useState("");
+  const [allowedDomains, setAllowedDomains] = useState(user?.allowedDomains || []);
+  const [domainInput, setDomainInput] = useState("");
+  const [language, setLanguage] = useState(user?.language || "auto");
   const [loading, setLoading] = useState(false);
 
   const normalizeTheme = (value) => {
@@ -107,16 +148,39 @@ const Builder = ({ user, setUser }) => {
     setBussinessDescription(user.bussinessDescription || "");
     setTheme(normalizeTheme(user.theme));
     setTone(user.tone || "Friendly");
-    setGeminiApiKey(user.geminiApiKey || "");
+    setGeminiApiKey("");
     setPages(user.pages || []);
+    setAllowedDomains(user.allowedDomains || []);
+    setLanguage(user.language || "auto");
   }, [user]);
+
+  const addDomain = () => {
+    const host = toHostname(domainInput);
+
+    if (host && !allowedDomains.includes(host)) {
+      setAllowedDomains([...allowedDomains, host]);
+    }
+
+    setDomainInput("");
+  };
 
   const addPage = () => {
     if (!pageName || !pagePath) return;
 
+    const path = pagePath.trim();
+    const safePath =
+      path.startsWith("#") ||
+      (path.startsWith("/") && !path.startsWith("//")) ||
+      /^https?:\/\/[^\s]+$/i.test(path);
+
+    if (!safePath) {
+      toast.error('Path must start with "/" or "#", or be an http(s):// link.');
+      return;
+    }
+
     const newPage = {
       name: pageName,
-      path: pagePath,
+      path,
       keywords: pageKeywords
         .split(",")
         .map((k) => k.trim().toLowerCase())
@@ -144,6 +208,8 @@ const Builder = ({ user, setUser }) => {
         theme: normalizeTheme(theme),
         geminiApiKey,
         pages,
+        allowedDomains,
+        language,
       };
       console.log("PAGES BEFORE SAVE:", pages);
       const res = await axios.post(
@@ -155,13 +221,14 @@ const Builder = ({ user, setUser }) => {
       console.log(res.data);
 
       setUser(res.data.user);
+      setGeminiApiKey("");
       setEditAssistantName(false);
 
       toast.success("Assistant Saved Successfully");
 
       setLoading(false);
     } catch (error) {
-      toast.error("Failed to save assistant");
+      toast.error(error.response?.data?.message || "Failed to save assistant");
       console.log(error);
 
       setLoading(false);
@@ -279,7 +346,10 @@ const Builder = ({ user, setUser }) => {
                 <p className="text-sm text-stone-600 mt-1">
                   Paste this script before the closing{" "}
                   <code className="font-mono text-gold-700">{"</body>"}</code>{" "}
-                  tag of your website HTML file.
+                  tag of your website HTML file. Optional attributes:{" "}
+                  <code className="font-mono text-gold-700">data-position="left"</code>,{" "}
+                  <code className="font-mono text-gold-700">data-offset="24"</code>,{" "}
+                  <code className="font-mono text-gold-700">data-theme="dark"</code>.
                 </p>
 
                 <div className="mt-5 rounded-2xl border border-stone-900 bg-[#0c0a14] overflow-hidden shadow-[0_20px_40px_-20px_rgba(12,10,20,0.6)]">
@@ -342,6 +412,16 @@ const Builder = ({ user, setUser }) => {
                       className={`w-3.5 h-3.5 rounded-full border border-black/10 ${THEME_SWATCHES[normalizeTheme(user.theme)]}`}
                     />
                     {normalizeTheme(user.theme)}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-stone-500">Language</dt>
+                  <dd className="text-stone-800 text-right">{languageLabel(user.language)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-stone-500">Allowed sites</dt>
+                  <dd className={user.allowedDomains?.length ? "text-stone-800" : "text-amber-600"}>
+                    {user.allowedDomains?.length ? `${user.allowedDomains.length} added` : "Any website"}
                   </dd>
                 </div>
               </dl>
@@ -521,7 +601,7 @@ const Builder = ({ user, setUser }) => {
                       Assistant name
                     </label>
                     <input
-                      id="assistantName"
+                      id="assistantName" maxLength={60}
                       type="text"
                       placeholder="Shifra"
                       onChange={(e) => setAssistantName(e.target.value)}
@@ -534,7 +614,7 @@ const Builder = ({ user, setUser }) => {
                       Business name
                     </label>
                     <input
-                      id="bussinessName"
+                      id="bussinessName" maxLength={100}
                       type="text"
                       placeholder="Acme Studio"
                       onChange={(e) => setBussinessName(e.target.value)}
@@ -547,7 +627,7 @@ const Builder = ({ user, setUser }) => {
                       Business type
                     </label>
                     <input
-                      id="bussinessType"
+                      id="bussinessType" maxLength={100}
                       type="text"
                       placeholder="Design agency, online store, clinic…"
                       onChange={(e) => setBussinessType(e.target.value)}
@@ -560,7 +640,7 @@ const Builder = ({ user, setUser }) => {
                       Business description
                     </label>
                     <textarea
-                      id="bussinessDescription"
+                      id="bussinessDescription" maxLength={2000}
                       rows={4}
                       placeholder="What you offer, who you serve, and anything visitors often ask about."
                       onChange={(e) => setBussinessDescription(e.target.value)}
@@ -639,7 +719,11 @@ const Builder = ({ user, setUser }) => {
                 <div className="relative">
                   <input
                     type={showApiKey ? "text" : "password"}
-                    placeholder="AIza..."
+                    placeholder={
+                      user?.hasGeminiKey
+                        ? `Saved key ending in ••••${user.geminiKeyHint}. Leave blank to keep it`
+                        : "AIza..."
+                    }
                     onChange={(e) => setGeminiApiKey(e.target.value)}
                     value={geminiApiKey}
                     className="field pr-12 font-mono"
@@ -657,6 +741,98 @@ const Builder = ({ user, setUser }) => {
               </Section>
 
               <Section
+                icon={FiGlobe}
+                title="Website & Language"
+                description="Where your assistant may be used, and which language it listens and speaks in."
+              >
+                <div className="grid gap-5">
+                  <div>
+                    <label className="field-label" htmlFor="language">
+                      Language
+                    </label>
+                    <select
+                      id="language"
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="field"
+                    >
+                      {LANGUAGES.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-2 text-xs text-stone-500">
+                      Used for voice input and speech. Written replies always follow the visitor's language.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="field-label" htmlFor="domain">
+                      Allowed websites
+                    </label>
+                    <div className="flex gap-3">
+                      <input
+                        id="domain"
+                        type="text"
+                        placeholder="yourwebsite.com"
+                        className="field font-mono"
+                        value={domainInput}
+                        onChange={(e) => setDomainInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addDomain();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={addDomain}
+                        disabled={!domainInput.trim()}
+                        className="btn-ghost h-[46px] shrink-0"
+                      >
+                        <FiPlus />
+                        Add
+                      </button>
+                    </div>
+
+                    {allowedDomains.length ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {allowedDomains.map((domain) => (
+                          <span
+                            key={domain}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-gold-200 bg-gold-50 py-1 pl-3 pr-1.5 font-mono text-xs text-stone-800"
+                          >
+                            {domain}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAllowedDomains(allowedDomains.filter((item) => item !== domain))
+                              }
+                              aria-label={`Remove ${domain}`}
+                              className="w-5 h-5 rounded-full flex items-center justify-center text-stone-500 hover:bg-gold-100 hover:text-rose-500"
+                            >
+                              <FiX size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs leading-5 text-amber-800">
+                        <FiAlertTriangle className="mt-0.5 shrink-0" />
+                        Any website can use your assistant right now. Add your domains so nobody can copy your embed code and use up your Gemini quota.
+                      </p>
+                    )}
+
+                    <p className="mt-2 text-xs text-stone-500">
+                      Subdomains are included, so <span className="font-mono">shop.com</span> also allows <span className="font-mono">www.shop.com</span> and <span className="font-mono">blog.shop.com</span>.
+                    </p>
+                  </div>
+                </div>
+              </Section>
+
+              <Section
                 icon={FiNavigation}
                 title="Navigation Pages"
                 description="Let visitors open pages by voice, e.g. “go to pricing”."
@@ -667,7 +843,7 @@ const Builder = ({ user, setUser }) => {
                       Page
                     </label>
                     <input
-                      id="pageName"
+                      id="pageName" maxLength={60}
                       type="text"
                       placeholder="Pricing"
                       className="field"
@@ -681,7 +857,7 @@ const Builder = ({ user, setUser }) => {
                       Path
                     </label>
                     <input
-                      id="pagePath"
+                      id="pagePath" maxLength={300}
                       type="text"
                       placeholder="/pricing"
                       className="field font-mono"
@@ -796,8 +972,8 @@ const Builder = ({ user, setUser }) => {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-stone-500">API key</dt>
-                  <dd className={geminiApiKey ? "text-emerald-600" : "text-amber-600"}>
-                    {geminiApiKey ? "Added" : "Missing"}
+                  <dd className={geminiApiKey || user?.hasGeminiKey ? "text-emerald-600" : "text-amber-600"}>
+                    {geminiApiKey ? "New key" : user?.hasGeminiKey ? "Saved" : "Missing"}
                   </dd>
                 </div>
                 <div className="flex justify-between">

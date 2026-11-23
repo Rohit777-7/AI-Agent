@@ -1,42 +1,52 @@
 import { genToken } from "../Configs/token.js";
 import User from "../Models/user.model.js";
-import jwt from "jsonwebtoken";
+import { verifyFirebaseIdToken, InvalidIdTokenError } from "../Configs/firebaseAuth.js";
+import { toClientUser, authCookieOptions } from "../Configs/clientUser.js";
 
+const SESSION_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day, matches the JWT expiry
 
+// The browser sends the Firebase ID token from Google sign-in. Identity comes
+// only from the verified token, never from fields the client chooses.
 export const googleAuth = async (req, res) => {
     try {
-        const { name, email, } = req.body;    
-        if (!name || !email) {
-            return res.status(400).json({ message: "Name and email are required" });
-        }       
-        let user = await User.findOne({ email });
-        if (!user) {
-            user = await User.create({ name, email });
+        const { idToken } = req.body || {};
+
+        let claims;
+
+        try {
+            claims = await verifyFirebaseIdToken(idToken);
+        } catch (error) {
+            if (error instanceof InvalidIdTokenError) {
+                return res.status(401).json({ message: "Sign-in could not be verified. Please try again." });
+            }
+            throw error;
         }
-        const token = await genToken(user._id);
-        console.log("Generated token:", token); // Debugging log
-        res.cookie("token", token, {
-            httpOnly: true, 
-            secure:false,
-            sameSite:"strict",
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
-            return res.status(200).json({ message: "Google authentication successful", user });
+
+        const email = claims.email.toLowerCase();
+        const name = (typeof claims.name === "string" && claims.name.trim()) || email.split("@")[0];
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({ name: name.slice(0, 100), email });
+        }
+
+        const token = genToken(user._id);
+
+        res.cookie("token", token, { ...authCookieOptions, maxAge: SESSION_MAX_AGE });
+
+        return res.status(200).json({ message: "Google authentication successful", user: toClientUser(user) });
     } catch (error) {
-        console.log("Google authentication failed", error);
-        res.status(500).json({ message: "Google authentication failed" });
+        console.error("Google authentication failed:", error.message);
+        return res.status(500).json({ message: "Google authentication failed" });
     }
-}
+};
 
 export const logout = (req, res) => {
     try {
-        res.clearCookie("token",{
-            httpOnly: true,
-            Secure:false,
-            sameSite:"strict",
-        });
+        res.clearCookie("token", authCookieOptions);
         return res.status(200).json({ message: "Logout successful" });
     } catch (error) {
-        res.status(500).json({ message: "Logout failed" });
-    }           
+        return res.status(500).json({ message: "Logout failed" });
+    }
 };

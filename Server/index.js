@@ -74,10 +74,21 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration
+const isProduction = Boolean(process.env.VERCEL) || process.env.NODE_ENV === "production";
+
+// Don't advertise the framework, and send baseline security headers.
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// CORS configuration: the local dev origin is only trusted outside production.
 const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.CLIENT_URL
+  process.env.CLIENT_URL,
+  ...(isProduction ? [] : ["http://localhost:5173"]),
 ].filter(Boolean);
 
 const privateCors = cors({
@@ -90,7 +101,7 @@ const publicCors = cors({
 });
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
 
 // Health check

@@ -1,9 +1,68 @@
+/* Shadow DOM base: the host page's styles don't reach in here, so start clean. */
+:host{
+    all:initial;
+}
+
+*,
+*::before,
+*::after{
+    box-sizing:border-box;
+    margin:0;
+}
+
+button,
+input{
+    font:inherit;
+    color:inherit;
+}
+
+button{
+    padding:0;
+    border:0;
+    background:none;
+}
+
+img{
+    display:block;
+}
+
+[hidden]{
+    display:none !important;
+}
+
+.shifra-popup,
+.shifra-btn{
+    font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+}
+
+.shifra-popup{
+    color:#fff;
+}
+
+button:focus-visible,
+input:focus-visible{
+    outline:2px solid #60a5fa;
+    outline-offset:2px;
+}
+
+/* data-position="left" */
+:host([data-position="left"]) .shifra-btn,
+:host([data-position="left"]) .shifra-popup{
+    right:auto;
+    left:var(--shifra-offset, 18px);
+}
+
+:host([data-position="left"]) .shifra-popup{
+    transform-origin:bottom left;
+}
 /* toggle btn */
 
 .shifra-btn{
     position:fixed;
-    right:18px;
-    bottom:18px;
+    right:var(--shifra-offset, 18px);
+    bottom:var(--shifra-offset, 18px);
     width:68px;
     height:68px;
     border:none;
@@ -52,14 +111,14 @@
 
 .shifra-popup{
     position: fixed;
-    right: 18px;
-    bottom: 98px;
+    right: var(--shifra-offset, 18px);
+    bottom: calc(var(--shifra-offset, 18px) + 80px);
 
     width: 340px;
     max-width: calc(100vw - 24px);
 
     /* Size to the content, but never taller than the window */
-    max-height: calc(100vh - 118px);
+    max-height: calc(100vh - var(--shifra-offset, 18px) - 100px);
 
     border-radius: 32px;
     overflow: hidden auto;
@@ -1033,6 +1092,11 @@
         max-height:calc(100vh - 100px);
 
         border-radius:28px;
+    }
+
+    :host([data-position="left"]) .shifra-popup{
+        right:auto;
+        left:12px;
     }
 
     .shifra-btn img{

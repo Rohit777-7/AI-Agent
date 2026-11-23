@@ -126,12 +126,71 @@ function Chat({ user, setUser }) {
 
   const theme = THEME_SWATCHES[user?.theme] ? user.theme : "dark";
 
-  const speak = (text) => {
-    if (!voiceReplies || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-IN";
-    window.speechSynthesis.speak(utterance);
+  const voiceLanguage =
+    user?.language && user.language !== "auto"
+      ? user.language
+      : navigator.language || "en-IN";
+
+  // Speaks when voice replies are on. onDone runs when speech ends, fails, or
+  // (with voice off) after a short pause to read the reply.
+  const speak = (text, onDone) => {
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      onDone?.();
+    };
+
+    if (!voiceReplies || !window.speechSynthesis) {
+      if (onDone) navigateTimerRef.current = setTimeout(done, 900);
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = voiceLanguage;
+      utterance.onend = done;
+      utterance.onerror = done;
+      window.speechSynthesis.speak(utterance);
+      // Some browsers never fire onend when audio is blocked.
+      navigateTimerRef.current = setTimeout(done, Math.min(15000, 1500 + text.length * 80));
+    } catch {
+      done();
+    }
+  };
+
+  // External sites open in a new tab; app pages open in place. Anything else
+  // (javascript:, data:, //other-site) is ignored.
+  const goTo = (path) => {
+    if (typeof path !== "string") return;
+
+    if (/^https?:\/\//i.test(path)) {
+      const url = new URL(path);
+      if (url.origin === window.location.origin) {
+        navigate(url.pathname + url.search + url.hash);
+      } else {
+        window.open(url.href, "_blank", "noopener");
+      }
+      return;
+    }
+
+    if ((path.startsWith("/") && !path.startsWith("//")) || path.startsWith("#")) {
+      navigate(path);
+    }
+  };
+
+  // Adds the streamed reply as one assistant message and keeps it updated.
+  const updateStreamingReply = (text, streaming = true) => {
+    setMessages((prev) => {
+      const last = prev[prev.length - 1];
+
+      if (last?.streaming) {
+        return [...prev.slice(0, -1), { ...last, text, streaming }];
+      }
+
+      return [...prev, { role: "assistant", text, streaming }];
+    });
   };
 
   const refreshUser = async () => {
@@ -149,46 +208,86 @@ function Chat({ user, setUser }) {
     const text = raw.trim();
     if (!text || sending) return;
 
+    // The last few turns let follow-ups like "tell me more" make sense.
+    const history = messages
+      .filter((message) => !message.error && message.text)
+      .slice(-6)
+      .map(({ role, text: turnText }) => ({ role, text: turnText }));
+
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text }]);
     setSending(true);
+    clearTimeout(navigateTimerRef.current);
 
     try {
-      const { data } = await axios.post(ServerUrl + "/api/assistant/ask", {
-        message: text,
-        userId: user._id,
-        currentPath: "/chat",
-      });
+      let response;
 
-      if (data.action === "navigate") {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", text: data.response, path: data.path },
-        ]);
-        speak(data.response);
-
-        // Go there like the website widget does, after a moment to read the reply.
-        clearTimeout(navigateTimerRef.current);
-        navigateTimerRef.current = setTimeout(() => {
-          if (/^https?:\/\//i.test(data.path)) {
-            window.location.href = data.path;
-          } else {
-            navigate(data.path);
-          }
-        }, 1200);
-      } else {
-        const reply = data.aiResponse || data.response || "Done";
-        setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-        speak(reply);
-        if (data.aiResponse) refreshUser();
+      try {
+        response = await fetch(ServerUrl + "/api/assistant/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: text,
+            userId: user._id,
+            currentPath: "/chat",
+            history,
+            stream: true,
+          }),
+        });
+      } catch {
+        throw new Error("Couldn't reach the server. Please try again.");
       }
+
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Something went wrong. Please try again.");
+        }
+
+        if (data.action === "navigate") {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", text: data.response, path: data.path },
+          ]);
+          // Go there once the reply has been spoken, like the website widget.
+          speak(data.response, () => goTo(data.path));
+        } else {
+          const reply = data.response || data.aiResponse || "Done";
+          setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+          speak(reply);
+          if (data.aiResponse) refreshUser();
+        }
+
+        return;
+      }
+
+      // Streamed reply: show the words as they arrive.
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let reply = "";
+
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        reply += decoder.decode(value, { stream: true });
+        updateStreamingReply(reply);
+      }
+
+      reply = reply.trim() || "Sorry, I didn't catch that. Could you rephrase it?";
+      updateStreamingReply(reply, false);
+      speak(reply);
+      refreshUser();
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        "Something went wrong. Please try again.";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", text: message, error: true },
+        {
+          role: "assistant",
+          text: error.message || "Something went wrong. Please try again.",
+          error: true,
+        },
       ]);
     } finally {
       setSending(false);
@@ -207,7 +306,7 @@ function Chat({ user, setUser }) {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
+    recognition.lang = voiceLanguage;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = (event) => sendMessage(event.results[0][0].transcript);
@@ -423,7 +522,7 @@ function Chat({ user, setUser }) {
                   ),
                 )}
 
-                {sending && (
+                {sending && messages[messages.length - 1]?.role === "user" && (
                   <div className="flex items-start gap-3">
                     <img src={logo} alt="" className="mt-1 w-8 h-8 shrink-0 rounded-full" />
                     <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md border border-gold-200/80 bg-[#fffdf9] px-4 py-4">

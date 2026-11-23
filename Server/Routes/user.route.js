@@ -1,11 +1,16 @@
 import express from "express";
-import { getCurrentUser } from "../Controllers/user.controller.js";
+import { getCurrentUser, saveAssistant } from "../Controllers/user.controller.js";
 import { isAuth } from "../Middleware/isAuth.js";
-import { saveAssistant } from "../Controllers/user.controller.js";
+import { rateLimit } from "../Middleware/rateLimit.js";
 
 const userRouter = express.Router();
 
 userRouter.get("/current-user", isAuth, getCurrentUser);
-userRouter.post("/save-assistant", isAuth, saveAssistant);
+userRouter.post(
+  "/save-assistant",
+  isAuth,
+  rateLimit({ name: "save-assistant", limit: 30, windowMs: 60 * 1000 }),
+  saveAssistant,
+);
 
 export default userRouter;

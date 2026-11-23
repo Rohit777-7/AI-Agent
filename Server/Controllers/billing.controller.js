@@ -2,26 +2,48 @@ import crypto from "crypto";
 import User from "../Models/user.model.js";
 import Billing from "../Models/Billing.model.js";
 import { razorpay } from "../Configs/razorpay.js";
+import { toClientUser } from "../Configs/clientUser.js";
+
+const PLANS = {
+  pro: { amount: 699, days: 90 },
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const isValidSignature = (orderId, paymentId, signature) => {
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+
+  const expectedBuffer = Buffer.from(expected);
+  const signatureBuffer = Buffer.from(signature);
+
+  return (
+    expectedBuffer.length === signatureBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, signatureBuffer)
+  );
+};
 
 export const createOrder = async (req, res) => {
   try {
-    const { plan } = req.body;
-    const userId = req.userId;
+    const { plan } = req.body || {};
 
-    let amount = 0;
-
-    if (plan === "pro") {
-      amount = 699;
+    if (typeof plan !== "string" || !Object.hasOwn(PLANS, plan)) {
+      return res.status(400).json({ success: false, message: "Unknown plan" });
     }
+
+    const { amount } = PLANS[plan];
 
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
+      notes: { userId: req.userId, plan },
     });
 
     await Billing.create({
-      userId,
+      userId: req.userId,
       amount,
       plan,
       orderId: order.id,
@@ -32,7 +54,7 @@ export const createOrder = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Order creation failed:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -44,53 +66,58 @@ export const createOrder = async (req, res) => {
 export const verifyBilling = async (req, res) => {
   try {
     const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+      razorpay_order_id: orderId,
+      razorpay_payment_id: paymentId,
+      razorpay_signature: signature,
+    } = req.body || {};
 
-    const userId = req.userId;
+    const fields = [orderId, paymentId, signature];
 
-    const sign = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
-      .digest("hex");
+    if (!fields.every((value) => typeof value === "string" && value.length > 0 && value.length < 200)) {
+      return res.status(400).json({ success: false, message: "Invalid payment details" });
+    }
 
-    if (sign !== razorpay_signature) {
-      return res.json({
+    if (!isValidSignature(orderId, paymentId, signature)) {
+      return res.status(400).json({ success: false, message: "Payment verification failed" });
+    }
+
+    // Claim the order exactly once, and only for the account that created it,
+    // so one payment can never upgrade a second account.
+    const billing = await Billing.findOneAndUpdate(
+      { orderId, userId: req.userId, status: "created" },
+      { $set: { status: "paid", paymentId } },
+      { returnDocument: "after" },
+    );
+
+    if (!billing) {
+      return res.status(409).json({
         success: false,
-        message: "Payment verification failed",
+        message: "This payment has already been used or belongs to another account.",
       });
     }
 
-    await Billing.findOneAndUpdate(
-      { orderId: razorpay_order_id },
-      {
-        paymentId: razorpay_payment_id,
-        status: "paid",
-      }
-    );
+    const { days } = PLANS[billing.plan] || PLANS.pro;
+    const user = await User.findById(req.userId);
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      {
-        plan: "pro",
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-        paymentStatus: "paid",
+    // Buying again while Pro is active extends it instead of resetting it.
+    const stillActive =
+      user.plan === "pro" && user.proExpiresAt && new Date(user.proExpiresAt) > new Date();
+    const startsAt = stillActive ? new Date(user.proExpiresAt).getTime() : Date.now();
 
-        proExpiresAt: new Date(
-          Date.now() + 90 * 24 * 60 * 60 * 1000
-        ),
-      },
-      { new: true }
-    );
+    user.plan = "pro";
+    user.proExpiresAt = new Date(startsAt + days * DAY_MS);
+    await user.save();
 
     return res.json({
       success: true,
-      user,
+      user: toClientUser(user),
     });
   } catch (error) {
-    console.log(error);
+    console.error("Payment verification failed:", error.message);
 
     return res.status(500).json({
       success: false,

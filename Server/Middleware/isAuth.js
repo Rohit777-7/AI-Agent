@@ -1,32 +1,26 @@
 import jwt from "jsonwebtoken";
 
-export const isAuth = async (req, res, next) => {
+const unauthorized = (res) =>
+  res.status(401).json({ message: "Please sign in again." });
+
+export const isAuth = (req, res, next) => {
+  const token = req.cookies?.token;
+
+  if (typeof token !== "string" || !token) {
+    return unauthorized(res);
+  }
+
   try {
-    const token = req.cookies.token;
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
 
-    if (!token) {
-      return res.status(400).json({
-        message: "user does not have token",
-      });
+    if (typeof payload?.userId !== "string") {
+      return unauthorized(res);
     }
 
-    const verifyToken = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    if (!verifyToken) {
-      return res.status(400).json({
-        message: "user does not have valid token",
-      });
-    }
-
-    req.userId = verifyToken.userId;
-
-    next();
-  } catch (error) {
-    return res.status(500).json({
-      message: `isAuth error ${error.message}`,
-    });
+    req.userId = payload.userId;
+    return next();
+  } catch {
+    // Expired, tampered or malformed: same answer, no internal details.
+    return unauthorized(res);
   }
 };

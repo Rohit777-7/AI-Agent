@@ -11,9 +11,17 @@ const billingSchema = new mongoose.Schema(
 
     plan: String,
 
-    paymentId: String,
+    // Each Razorpay order and payment can be recorded only once.
+    paymentId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
 
-    orderId: String,
+    orderId: {
+      type: String,
+      unique: true,
+    },
 
     status: {
       type: String,

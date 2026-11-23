@@ -63,6 +63,16 @@ const userSchema = new mongoose.Schema({
             type:Boolean,
             default:true
         },
+        // Websites allowed to use this assistant (hostnames). Empty = any site.
+        allowedDomains:{
+            type:[String],
+            default:[]
+        },
+        // Speech and reply language: "auto" follows the visitor's browser.
+        language:{
+            type:String,
+            default:"auto"
+        },
         geminiApiKey:{
             type:String,
             default:""
