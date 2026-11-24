@@ -75,7 +75,7 @@ function Navbar({ user, setUser }) {
           />
 
           <span className="font-bold text-lg tracking-tight text-stone-950">
-            Shifra <span className="text-gradient">AI</span>
+            AskMe <span className="text-gradient">AI</span>
           </span>
         </button>
 

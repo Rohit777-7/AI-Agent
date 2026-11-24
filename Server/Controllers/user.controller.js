@@ -169,7 +169,7 @@ export const saveAssistant = async (req, res) => {
       throw new ValidationError("Please enter a valid Gemini API key, not code or text.");
     }
 
-    user.assistantName = assistantName || "ShifraAI";
+    user.assistantName = assistantName || "AskMe AI";
     user.bussinessName = bussinessName;
     user.bussinessType = bussinessType;
     user.bussinessDescription = bussinessDescription;

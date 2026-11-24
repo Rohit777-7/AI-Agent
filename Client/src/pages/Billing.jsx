@@ -62,7 +62,7 @@ const FAQS = [
   },
   {
     q: "Is my payment secure?",
-    a: "Checkout is handled by Razorpay, and your card details are entered on Razorpay's secure form, not stored by ShifraAI.",
+    a: "Checkout is handled by Razorpay, and your card details are entered on Razorpay's secure form, not stored by AskMe AI.",
   },
 ];
 
@@ -128,7 +128,7 @@ function Billing({ user, setUser }) {
 
         currency: order.currency,
 
-        name: "ShifraAI",
+        name: "AskMe AI",
 
         description: "Pro Plan",
 

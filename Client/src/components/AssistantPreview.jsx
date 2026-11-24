@@ -171,7 +171,7 @@ const AssistantPreview = () => {
             <h2
               className={`text-[22px] sm:text-[28px] font-semibold tracking-tight ${current.text}`}
             >
-              Hello! I'm Shifra AI
+              Hello! I'm AskMe AI
             </h2>
 
             <p

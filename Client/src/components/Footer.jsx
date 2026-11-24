@@ -31,7 +31,7 @@ function Footer() {
             <Link to="/" className="inline-flex items-center gap-3">
               <img src={logo} alt="" className="w-9 h-9 rounded-full shadow-[0_0_24px_-6px_rgba(176,141,87,0.6)]" />
               <span className="font-display text-2xl text-stone-950">
-                Shifra <span className="italic text-gradient">AI</span>
+                AskMe <span className="italic text-gradient">AI</span>
               </span>
             </Link>
 
@@ -75,7 +75,7 @@ function Footer() {
         </div>
 
         <div className="mt-14 pt-6 border-t border-gold-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
-          <p>© {new Date().getFullYear()} ShifraAI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} AskMe AI. All rights reserved.</p>
           <p className="tracking-[0.14em] uppercase">Crafted for voice-first websites</p>
         </div>
       </div>

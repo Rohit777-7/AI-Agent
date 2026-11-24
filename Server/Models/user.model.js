@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     },
     assistantName:{
         type:String,
-        default:"ShifraAI"
+        default:"AskMe AI"
     },
     bussinessName:{
         type:String,

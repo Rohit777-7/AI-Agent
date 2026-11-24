@@ -2,14 +2,19 @@ import User from "../Models/user.model.js";
 
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
-// gemini-3.1-flash-lite with minimal thinking answered in ~1.5s in testing,
-// versus 17-40s for gemini-3.5-flash with default thinking.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
+// Fast "lite" models with minimal thinking answer in ~1s. A single model is
+// sometimes overloaded ("high demand") for a while, so each retry moves to the
+// next model in this list. GEMINI_MODEL, if set, is tried first.
+const GEMINI_MODELS = [
+  ...new Set(
+    [process.env.GEMINI_MODEL, "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"].filter(Boolean),
+  ),
+];
 const GEMINI_TIMEOUT_MS = 10000;
-// Gemini occasionally stalls or returns a 5xx; if it hasn't started answering
-// within this time, the request is retried once inside the overall timeout.
-const FIRST_ATTEMPT_MS = 5000;
-const RETRYABLE_STATUSES = new Set([500, 502, 503, 504]);
+// If a model hasn't started answering within this time, the next one is tried.
+const ATTEMPT_MS = 3500;
+// Overloaded or unavailable models; a bad key (401/403) is not retried.
+const RETRYABLE_STATUSES = new Set([404, 429, 500, 502, 503, 504]);
 const MAX_OUTPUT_TOKENS = 150;
 
 export class GeminiError extends Error {
@@ -63,43 +68,56 @@ const timeoutError = () =>
     timeout: true,
   });
 
-// Opens the streaming request, retrying once on a stall, network error or 5xx.
-// The returned controller aborts the stream when the overall deadline passes.
-const openReplyStream = async (url, init, user, deadline) => {
-  for (let attempt = 1; attempt <= 2; attempt++) {
+// Opens the streaming request, moving to the next model on a stall, network
+// error, overload or 5xx. A model only counts as answering once the first piece
+// of the reply arrives, since a busy model can send headers and then stall.
+// The returned timer aborts the stream when the overall deadline passes.
+const openReplyStream = async (init, user, deadline) => {
+  let lastError = null;
+
+  for (let index = 0; index < GEMINI_MODELS.length; index++) {
+    const isLast = index === GEMINI_MODELS.length - 1;
     const remaining = deadline - Date.now();
-    const budget = attempt === 1 ? Math.min(FIRST_ATTEMPT_MS, remaining) : remaining;
+    const budget = isLast ? remaining : Math.min(ATTEMPT_MS, remaining);
 
     if (budget < 500) break;
 
+    const url = `${GEMINI_BASE_URL}/${GEMINI_MODELS[index]}:streamGenerateContent?alt=sse`;
     const controller = new AbortController();
     let timer = setTimeout(() => controller.abort(), budget);
 
     try {
       const response = await fetch(url, { ...init, signal: controller.signal });
 
-      if (response.ok) {
+      if (!response.ok) {
         clearTimeout(timer);
-        timer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()));
-        return { response, controller, timer };
+
+        if (isLast || !RETRYABLE_STATUSES.has(response.status)) {
+          throw await toGeminiError(user, response);
+        }
+
+        lastError = new GeminiError(`${GEMINI_MODELS[index]} returned ${response.status}`);
+        await response.body?.cancel().catch(() => {});
+        continue;
       }
+
+      const reader = response.body.getReader();
+      const first = await reader.read();
 
       clearTimeout(timer);
-
-      if (attempt === 2 || !RETRYABLE_STATUSES.has(response.status)) {
-        throw await toGeminiError(user, response);
-      }
-
-      await response.body?.cancel();
+      timer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()));
+      return { reader, first, timer };
     } catch (error) {
       clearTimeout(timer);
 
       if (error instanceof GeminiError) throw error;
-      if (attempt === 2) throw error.name === "AbortError" ? timeoutError() : error;
+
+      lastError = error.name === "AbortError" ? timeoutError() : error;
+      controller.abort();
     }
   }
 
-  throw timeoutError();
+  throw lastError || timeoutError();
 };
 
 // Streams a reply from Gemini. Yields { text } chunks, or one { navigate: path }
@@ -147,8 +165,7 @@ export async function* streamGeminiReply({ user, systemPrompt, history = [], mes
     ];
   }
 
-  const { response, timer } = await openReplyStream(
-    `${GEMINI_BASE_URL}/${GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+  const { reader, first, timer } = await openReplyStream(
     {
       method: "POST",
       headers: {
@@ -162,12 +179,13 @@ export async function* streamGeminiReply({ user, systemPrompt, history = [], mes
   );
 
   try {
-    const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let next = first;
 
     for (;;) {
-      const { value, done } = await reader.read();
+      const { value, done } = next || (await reader.read());
+      next = null;
       if (done) break;
 
       buffer = (buffer + decoder.decode(value, { stream: true })).replace(/\r\n/g, "\n");

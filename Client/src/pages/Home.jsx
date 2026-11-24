@@ -138,7 +138,7 @@ const Home = ({ user }) => {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-3xl">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-gold-600">
-              Why Shifra
+              Why AskMe AI
             </p>
             <h2 className="mt-4 font-display text-4xl sm:text-6xl leading-[1.05] tracking-[-0.015em] text-stone-950">
               Everything a website assistant{" "}

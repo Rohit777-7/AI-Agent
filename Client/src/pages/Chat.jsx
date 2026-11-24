@@ -345,7 +345,7 @@ function Chat({ user, setUser }) {
           <Link to="/" className="flex items-center gap-2.5 px-1">
             <img src={logo} alt="" className="w-9 h-9 rounded-full shadow-[0_0_24px_-6px_rgba(176,141,87,0.6)]" />
             <span className="font-display text-2xl text-stone-950">
-              Shifra <span className="italic text-gradient">AI</span>
+              AskMe <span className="italic text-gradient">AI</span>
             </span>
           </Link>
 
@@ -413,7 +413,7 @@ function Chat({ user, setUser }) {
             <Link to="/" className="flex items-center gap-2">
               <img src={logo} alt="" className="w-7 h-7 rounded-full" />
               <span className="font-display text-xl text-stone-950">
-                Shifra <span className="italic text-gradient">AI</span>
+                AskMe <span className="italic text-gradient">AI</span>
               </span>
             </Link>
             <nav className="flex items-center gap-1">

@@ -603,7 +603,7 @@ const Builder = ({ user, setUser }) => {
                     <input
                       id="assistantName" maxLength={60}
                       type="text"
-                      placeholder="Shifra"
+                      placeholder="AskMe"
                       onChange={(e) => setAssistantName(e.target.value)}
                       value={assistantName}
                       className="field"

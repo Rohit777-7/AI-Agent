@@ -77,7 +77,7 @@ function Login({ setUser }) {
           <div className="flex items-center gap-2.5">
             <img src={logo} alt="" className="w-8 h-8 rounded-full shadow-[0_0_24px_-4px_rgba(176,141,87,0.55)]" />
             <span className="font-display text-2xl text-stone-950">
-              Shifra <span className="italic text-gradient">AI</span>
+              AskMe <span className="italic text-gradient">AI</span>
             </span>
           </div>
 
@@ -190,7 +190,7 @@ function Login({ setUser }) {
       {/* Footer strip */}
       <footer className="relative border-t border-gold-200/60">
         <div className="max-w-6xl mx-auto h-12 px-6 flex items-center justify-between gap-4 text-xs text-stone-500">
-          <p>© {new Date().getFullYear()} ShifraAI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} AskMe AI. All rights reserved.</p>
           <p className="hidden sm:block uppercase tracking-[0.14em]">
             Crafted for voice-first websites
           </p>

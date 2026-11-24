@@ -1,5 +1,5 @@
 /*
- * ShifraAI website assistant.
+ * AskMe AI website assistant.
  *
  * <script src="https://YOUR-SHIFRA-DOMAIN/assistant.js" data-user-id="..."
  *         data-position="right" data-offset="18" data-theme="dark" data-z-index="9000"></script>
@@ -10,7 +10,7 @@
   "use strict";
 
   if (window.__shifraAssistantLoaded) {
-    console.warn("[Shifra] assistant.js is included more than once; ignoring the extra copy.");
+    console.warn("[AskMe AI] assistant.js is included more than once; ignoring the extra copy.");
     return;
   }
   window.__shifraAssistantLoaded = true;
@@ -25,7 +25,7 @@
 
   if (!script || !userId) {
     console.warn(
-      "[Shifra] Missing data-user-id on the assistant <script> tag. Copy the embed code from your ShifraAI Builder.",
+      "[AskMe AI] Missing data-user-id on the assistant <script> tag. Copy the embed code from your AskMe AI Builder.",
     );
     return;
   }
@@ -99,7 +99,7 @@
             <div class="shifra-orb"></div>
           </div>
 
-          <h2 class="shifra-title" id="shifra-title">Hello! I'm Shifra AI</h2>
+          <h2 class="shifra-title" id="shifra-title">Hello! I'm AskMe AI</h2>
 
           <p class="shifra-sub">Your smart voice assistant.<br />Ask anything about your website.</p>
 
@@ -208,7 +208,7 @@
   const goTo = (path) => {
     // Never follow javascript:, data: or protocol-relative links.
     if (!isSafePath(path)) {
-      console.warn("[Shifra] Ignored an unsafe navigation path:", path);
+      console.warn("[AskMe AI] Ignored an unsafe navigation path:", path);
       return;
     }
 
@@ -281,6 +281,27 @@
 
   let busy = false;
 
+  // What the visitor is looking at, so the assistant can answer questions
+  // about the website even when the owner hasn't written business details.
+  const MAX_PAGE_TEXT = 4000;
+
+  const getPageContext = () => {
+    try {
+      const description =
+        document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+      const root = document.querySelector("main") || document.body;
+      const text = (root?.innerText || "").replace(/\s+/g, " ").trim().slice(0, MAX_PAGE_TEXT);
+
+      return {
+        title: (document.title || "").slice(0, 200),
+        description: description.slice(0, 500),
+        text,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const ask = async (message) => {
     const question = message?.trim();
     if (!question || busy) return;
@@ -300,6 +321,7 @@
           userId,
           currentPath: window.location.pathname,
           history: history.slice(),
+          page: getPageContext(),
           stream: true,
         }),
       });
@@ -340,7 +362,7 @@
       remember(question, reply);
       speak(reply);
     } catch (error) {
-      console.warn("[Shifra] Request failed:", error);
+      console.warn("[AskMe AI] Request failed:", error);
       showReply("Sorry, I couldn't connect. Please try again.");
       setStatus(idleStatus());
     } finally {
@@ -491,14 +513,14 @@
       const data = await response.json();
 
       if (!response.ok) {
-        console.warn(`[Shifra] Couldn't load assistant "${userId}": ${data?.message || response.status}`);
+        console.warn(`[AskMe AI] Couldn't load assistant "${userId}": ${data?.message || response.status}`);
         return;
       }
 
       assistantConfig = data.assistant || data.user;
       applyConfig();
     } catch (error) {
-      console.warn("[Shifra] Couldn't load assistant settings:", error);
+      console.warn("[AskMe AI] Couldn't load assistant settings:", error);
     }
   };
 
